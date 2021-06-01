@@ -1,7 +1,6 @@
-import React, {} from 'react'
 import { View,StyleSheet } from 'react-native'
 import { Input, Button } from 'react-native-elements'
-import { useState, useEffect } from 'react';
+import React,{ useState, useEffect, } from 'react';
 import auth from '@react-native-firebase/auth';
 
 const RegisterScreen = ({navigation}) =>
@@ -12,7 +11,6 @@ const RegisterScreen = ({navigation}) =>
     const [imageUrl, setImageUrl] = useState('');
     const [initializing, setInitializing] = useState(true);
     const [user, setUser] = useState(null);
-   
     useEffect(() => {
         const unsubscribe = auth().onAuthStateChanged(function (user) {
         if (user) {
@@ -23,9 +21,9 @@ const RegisterScreen = ({navigation}) =>
             console.log('out')  
         }
     });
+
     return unsubscribe;
 }, [])
-
 
 
 const register = ({}) =>
@@ -48,7 +46,8 @@ const register = ({}) =>
                 console.log('That email address is invalid!');
             }
             
-            console.error(error);
+            console.log(error)
+            alert(error)
             
             
             });

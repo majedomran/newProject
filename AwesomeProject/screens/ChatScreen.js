@@ -1,17 +1,17 @@
-import React, { useEffect } from 'react'
 import { View, TouchableOpacity, Button } from 'react-native'
 import { Avatar } from 'react-native-elements'
-import { useState, useCallback, useLayoutEffect } from 'react'
+import React, { useEffect, useState, useCallback, useLayoutEffect } from 'react'
 import auth from '@react-native-firebase/auth';
-import { GiftedChat } from 'react-native-gifted-chat'
+import { Bubble, GiftedChat } from 'react-native-gifted-chat'
 import Feather from 'react-native-vector-icons/Feather';
 import firestore from '@react-native-firebase/firestore';
-
+import _ from 'lodash'
 
 Feather.loadFont()
 
 const ChatScreen = ({ navigation }) =>
 {
+
     function generateGuid()
     {
         var result, i, j;
@@ -33,38 +33,40 @@ const ChatScreen = ({ navigation }) =>
     }
     useEffect(() =>
     {
-        const oldMessages = []
+        const fireMessages = []
 
         const roomId = '0F112844-B80F-C753-2A07-670CB81692F7'
         setChatRoomId(roomId)
-        firestore().collection('chats').doc(roomId).collection('messages').orderBy('createdAt','desc').onSnapshot((snapshot) =>
+        firestore().collection('chats').doc(roomId).collection('messages').orderBy('createdAt', 'desc').onSnapshot((snapshot) =>
         {
             snapshot.docs.forEach((doc) =>
             {
+
                 const { _id, createdAt, text, user } = doc.data()
-                
+
+
+
                 if (doc.data()._id)
                 {
-                    oldMessages.push({
+                    fireMessages.push({
                         _id,
                         createdAt: new Date(createdAt.toDate()),
                         text,
                         user
                     })
-                    console.log("pushed", doc.data())
                 }
             })
+            let updatedMessages = _.unionBy(fireMessages, messages, '_id')
+
+            console.log('updatedMessages', updatedMessages[0]);
+
+            setMessages(updatedMessages.sort((a, b) =>
+            {
+                return new Date(b.createdAt) - new Date(a.createdAt)
+            }))
+            console.log('messages', messages[0])
         })
-        oldMessages.push({
-            _id:2,
-            createdAt: new Date(),
-            text:'hey',
-            user:{
-                _id:1
-            }
-        })
-        setMessages(oldMessages)
-        console.log(messages)
+
 
 
     }, [])
@@ -76,11 +78,6 @@ const ChatScreen = ({ navigation }) =>
 
         const { _id, createdAt, text, user,
         } = messages[0]
-        // console.log(
-        //     `ID${_id},
-        // createat ${createdAt}
-        // text ${text},
-        // user ${user}`);
 
         firestore().collection('chats').doc(chatRoomId).collection('messages').doc(generateGuid()).set({
             _id,
@@ -134,21 +131,58 @@ const ChatScreen = ({ navigation }) =>
             headerRight: () => (
                 <TouchableOpacity
                 >
-                    <Button
-                        title="Logout" onPress={signOut}
-                    />
-                    {/* <AntDesign name="logout" size={24} color="black" /> */}
+                   
                 </TouchableOpacity>
             )
         })
     }, [navigation])
-    return (<GiftedChat
-        messages={messages}
-        onSend={messages => onSend(messages)}
-        user={{
-            _id: auth()?.currentUser?.email,
-            name: auth()?.currentUser?.displayName
-        }} />
+
+
+    const renderBubble = (props) =>
+    {
+        return (
+            <Bubble
+                {...props}
+                wrapperStyle={{
+                    right: {
+                        backgroundColor: 'green'
+                    },
+                    left: {
+                        backgroundColor: '#6C6C6C',
+                        color: 'red'
+                    }
+                }}
+                textStyle={{
+                    right: {
+                        color: 'white'
+                    },
+                    left: {
+                        color: 'white'
+                    }
+                }}
+                timeTextStyle={{ left: { color: 'black' }, right: { color: 'black' } }}
+
+
+            />
+        )
+    }
+    return (
+
+        <GiftedChat
+            listViewProps={{
+                style: {
+                    backgroundColor: '#E7E7E7',
+                },
+            }}
+            messages={messages}
+            onSend={messages => onSend(messages)}
+            user={{
+                _id: auth()?.currentUser?.email,
+                name: auth()?.currentUser?.displayName
+            }}
+            renderBubble={renderBubble
+            }
+        />
     )
 }
 
