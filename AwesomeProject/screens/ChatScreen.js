@@ -26,36 +26,46 @@ const ChatScreen = ({ navigation }) =>
         return result;
     }
     const [messages, setMessages] = useState([]);
-    const [chatRoomId, setChatRoomId] = useState(generateGuid())
+    const [chatRoomId, setChatRoomId] = useState()
+    const newChatRoom = () =>
+    {
+        setChatRoomId(generateGuid())
+    }
     useEffect(() =>
     {
-        firestore().collection('chats').onSnapshot((snapshot) =>
+        const oldMessages = []
+
+        const roomId = '0F112844-B80F-C753-2A07-670CB81692F7'
+        setChatRoomId(roomId)
+        firestore().collection('chats').doc(roomId).collection('messages').orderBy('createdAt','desc').onSnapshot((snapshot) =>
         {
             snapshot.docs.forEach((doc) =>
             {
-                console.log(doc.data())
+                const { _id, createdAt, text, user } = doc.data()
+                
+                if (doc.data()._id)
+                {
+                    oldMessages.push({
+                        _id,
+                        createdAt: new Date(createdAt.toDate()),
+                        text,
+                        user
+                    })
+                    console.log("pushed", doc.data())
+                }
             })
         })
-
-        setMessages([
-
-            {
-                _id: 1,
-                text: 'hi',
-                createdAt: new Date(),
-                user: {
-                    _id: 2,
-                    name: 'hey'
-                }
+        oldMessages.push({
+            _id:2,
+            createdAt: new Date(),
+            text:'hey',
+            user:{
+                _id:1
             }
-        ])
+        })
+        setMessages(oldMessages)
+        console.log(messages)
 
-        // firestore().collection('chat').add({
-        //     _id,
-        //     createAt,
-        //     text,
-        //     user
-        // })
 
     }, [])
 
@@ -66,17 +76,18 @@ const ChatScreen = ({ navigation }) =>
 
         const { _id, createdAt, text, user,
         } = messages[0]
-        console.log(
-            `ID${_id},
-        createat ${createdAt}
-        text ${text},
-        user ${user}`);
+        // console.log(
+        //     `ID${_id},
+        // createat ${createdAt}
+        // text ${text},
+        // user ${user}`);
 
-        firestore().collection('chats').doc(chatRoomId).collection('messages').doc(_id).set({
+        firestore().collection('chats').doc(chatRoomId).collection('messages').doc(generateGuid()).set({
+            _id,
             createdAt,
             text,
             user
-            
+
         }).then(() =>
         {
 
