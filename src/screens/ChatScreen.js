@@ -102,19 +102,20 @@ const ChatScreen = ({ navigation }) => {
         console.log("firebase error", err);
       });
 
-    return () => {
-      console.log("unmounted");
-      firestore()
-        .collection("chats")
-        .doc(chatRoomId)
-        .collection("users")
-        .doc(auth().currentUser.email)
-        .delete();
-    };
+    // return () => {
+    //   console.log("unmounted");
+    //   firestore()
+    //     .collection("chats")
+    //     .doc(chatRoomId)
+    //     .collection("users")
+    //     .doc(auth().currentUser.email)
+    //     .delete();
+    // };
   }, []);
   const onSend = (messages = []) => {
+      console.log('user id is: ',auth().currentUser.uid);
+      
     setMessages((previousState) => GiftedChat.append(previousState, messages));
-    console.log(messages[0]);
 
     const { _id, createdAt, text, user } = messages[0];
 
@@ -201,7 +202,7 @@ const ChatScreen = ({ navigation }) => {
             color: "white",
           },
         }}
-        timeTextStyle={{ left: { color: "black" }, right: { color: "black" } }}
+        timeTextStyle={{ left: { color: "#AEAEAE" }, right: { color: "#AEAEAE" } }}
       />
     );
   };
@@ -215,7 +216,7 @@ const ChatScreen = ({ navigation }) => {
       messages={messages}
       onSend={(messages) => onSend(messages)}
       user={{
-        _id: auth()?.currentUser?.email,
+        _id: auth()?.currentUser?.uid,
         name: auth()?.currentUser?.displayName,
       }}
       renderBubble={renderBubble}

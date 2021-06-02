@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Input, Button } from "react-native-elements";
+import { Input, Button, Text } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("majed1@gmail.com");
   const [password, setPassword] = useState("12345678");
-  const [user, setUser] = useState(null);
-
+    const [loginError, setLoginError] = useState('')
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -25,8 +24,15 @@ const LoginScreen = ({ navigation }) => {
     auth()
       .signInWithEmailAndPassword(email, password)
       .catch((error) => {
-        var errorMessage = error.message;
-        alert(errorMessage);
+        var errorMessage = ''
+        errorMessage = error.message;
+        console.log(errorMessage)
+        if(errorMessage.includes('password'))
+        setLoginError('The password is incorrect')
+        if(errorMessage.includes('email'))
+        setLoginError('the email is incorrect')
+        if(errorMessage.includes('no user'))
+        setLoginError('the user doesn\'t exist ')
       });
   };
   return (
@@ -43,6 +49,7 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={(text) => setPassword(text)}
         secureTextEntry
       />
+      <Text style={{color:'red'}}>{loginError}</Text>
       <Button title="login" style={styles.button} onPress={signIn} />
       <Button
         title="register"

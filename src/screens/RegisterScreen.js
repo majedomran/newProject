@@ -1,5 +1,5 @@
 import { View, StyleSheet } from "react-native";
-import { Input, Button } from "react-native-elements";
+import { Input, Button,Text } from "react-native-elements";
 import React, { useState, useEffect } from "react";
 import auth from "@react-native-firebase/auth";
 
@@ -10,6 +10,7 @@ const RegisterScreen = ({ navigation }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
+  const [registerError,setRegisterError] = useState('')
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -33,14 +34,16 @@ const RegisterScreen = ({ navigation }) => {
       .catch((error) => {
         if (error.code === "auth/email-already-in-use") {
           console.log("That email address is already in use!");
+          setRegisterError("That email address is already in use!")
         }
 
         if (error.code === "auth/invalid-email") {
           console.log("That email address is invalid!");
+          setRegisterError("That email address is invalid!")
         }
 
         console.log(error);
-        alert(error);
+        
       });
   };
 
@@ -70,6 +73,7 @@ const RegisterScreen = ({ navigation }) => {
         label="Profile Picture"
         onChangeText={(text) => setImageUrl(text)}
       />
+      <Text style={{color:'red'}}>{registerError}</Text>
       <Button title="register" style={styles.button} onPress={register} />
     </View>
   );
