@@ -1,16 +1,15 @@
-import { View, TouchableOpacity, Button } from "react-native";
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useLayoutEffect,
-} from "react";
+import { View, TouchableOpacity } from "react-native";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import auth from "@react-native-firebase/auth";
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
 import Feather from "react-native-vector-icons/Feather";
 import firestore from "@react-native-firebase/firestore";
 import _ from "lodash";
-
+import { useSelector, useDispatch } from "react-redux";
+import {
+  logoutAction,
+  setLogedFalseAction,
+} from "../redux/reducers/authReducer";
 Feather.loadFont();
 function generateGuid() {
   var result, i, j;
@@ -25,14 +24,16 @@ function generateGuid() {
   return result;
 }
 const ChatScreen = ({ navigation }) => {
+  dispatch = useDispatch();
+  const { logedin, userEmail } = useSelector((state) => state.auth);
+
   const [messages, setMessages] = useState([]);
   const [chatRoomId, setChatRoomId] = useState(
     "0F112844-B80F-C753-2A07-670CB81692F7"
   );
-  const [currentUsers, setCurrentUsers] = useState(auth().currentUser.email);
-  const newChatRoom = () => {
-    setChatRoomId(generateGuid());
-  };
+  const [currentUsers, setCurrentUsers] = useState(email);
+  let email = "majed1@gmail.com";
+
   useEffect(() => {
     const fireMessages = [];
 
@@ -86,13 +87,14 @@ const ChatScreen = ({ navigation }) => {
       });
   }, []);
   useEffect(() => {
+    console.log("userEmail in chatscreen is: ", userEmail);
     firestore()
       .collection("chats")
       .doc(chatRoomId)
       .collection("users")
-      .doc(auth().currentUser.email)
+      .doc(userEmail)
       .set({
-        user: auth().currentUser.email,
+        user: userEmail,
         timeStamp: new Date().toISOString(),
       })
       .then(() => {
@@ -101,20 +103,13 @@ const ChatScreen = ({ navigation }) => {
       .catch((err) => {
         console.log("firebase error", err);
       });
-
-    // return () => {
-    //   console.log("unmounted");
-    //   firestore()
-    //     .collection("chats")
-    //     .doc(chatRoomId)
-    //     .collection("users")
-    //     .doc(auth().currentUser.email)
-    //     .delete();
-    // };
   }, []);
+  useEffect(() => {
+    if (!logedin) navigation.replace("login");
+  }, [logedin]);
   const onSend = (messages = []) => {
-      console.log('user id is: ',auth().currentUser.uid);
-      
+    console.log("user id is: ", auth().currentUser.uid);
+
     setMessages((previousState) => GiftedChat.append(previousState, messages));
 
     const { _id, createdAt, text, user } = messages[0];
@@ -136,24 +131,9 @@ const ChatScreen = ({ navigation }) => {
       });
   };
   const signOut = async () => {
-    await firestore()
-      .collection("chats")
-      .doc(chatRoomId)
-      .collection("users")
-      .doc(auth().currentUser.email)
-      .delete();
-
-    console.log("signed out");
-
-    auth()
-      .signOut()
-      .then(() => {
-        // Sign-out successful.
-        navigation.replace("Login");
-      })
-      .catch((error) => {
-        // An error happened.
-      });
+    dispatch(logoutAction());
+    // dispatch(setLogedFalseAction(false))
+    // deleteUser()
   };
   const deleteUser = () => {
     firestore()
@@ -202,7 +182,10 @@ const ChatScreen = ({ navigation }) => {
             color: "white",
           },
         }}
-        timeTextStyle={{ left: { color: "#AEAEAE" }, right: { color: "#AEAEAE" } }}
+        timeTextStyle={{
+          left: { color: "#AEAEAE" },
+          right: { color: "#AEAEAE" },
+        }}
       />
     );
   };
@@ -219,6 +202,7 @@ const ChatScreen = ({ navigation }) => {
         _id: auth()?.currentUser?.uid,
         name: auth()?.currentUser?.displayName,
       }}
+      renderAvatar={null}
       renderBubble={renderBubble}
     />
   );

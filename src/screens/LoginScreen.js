@@ -2,59 +2,60 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Input, Button, Text } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
-
+import { setUserAuthAction, loginAction } from "../redux/reducers/authReducer";
+import { useSelector, useDispatch } from "react-redux";
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("majed1@gmail.com");
-  const [password, setPassword] = useState("12345678");
-    const [loginError, setLoginError] = useState('')
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(function (user) {
-      if (user) {
-        console.log("in");
-        navigation.replace("Chat");
-      } else {
-        // No user is signed in.
+  const dispatch = useDispatch();
+  const { userID, userEmail, logedin, userPassword } = useSelector((state) => state.auth);
 
-        console.log("out");
-      }
-    });
-    return unsubscribe;
-  }, []);
-  const signIn = () => {
-    auth()
-      .signInWithEmailAndPassword(email, password)
-      .catch((error) => {
-        var errorMessage = ''
-        errorMessage = error.message;
-        console.log(errorMessage)
-        if(errorMessage.includes('password'))
-        setLoginError('The password is incorrect')
-        if(errorMessage.includes('email'))
-        setLoginError('the email is incorrect')
-        if(errorMessage.includes('no user'))
-        setLoginError('the user doesn\'t exist ')
-      });
+  const [localEmail, setLocalEmail] = useState("majed1@gmail.com");
+  const [loginError, setLoginError] = useState("");
+  const [localPassword, setLocalPassword] = useState('12345678')
+  useEffect(() => {
+    if (logedin) navigation.replace("chat");
+    return logedin
+  },[logedin])
+  const signIn = async() => {
+    console.log(
+      `localPassword:  ${localPassword}
+      localEmail: ${localEmail}`
+      
+  )
+    await dispatch(loginAction({ email: localEmail, password: localPassword }));
+    await dispatch(setUserAuthAction())
+    console.log(
+      `password:  ${userPassword}
+      userEmail: ${userEmail}
+      userid:   ${userID}
+      `
+  )
+    console.log("logedin: ",logedin);
   };
   return (
     <View style={styles.container}>
       <Input
         placeholder="Enter your email"
         label="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
+        value={localEmail}
+        onChangeText={(text) => setLocalEmail(text)}
       />
       <Input
         placeholder="Enter your password"
         label="Password"
-        onChangeText={(text) => setPassword(text)}
+        onChangeText={(text) => setLocalPassword(text)}
         secureTextEntry
       />
-      <Text style={{color:'red'}}>{loginError}</Text>
+      <Text style={{ color: "red" }}>{loginError}</Text>
       <Button title="login" style={styles.button} onPress={signIn} />
       <Button
         title="register"
         style={styles.button}
-        onPress={() => navigation.navigate("Register")}
+        onPress={() => navigation.navigate("register")}
+      />
+      <Button
+        title="ChatRooms"
+        style={styles.button}
+        onPress={() => navigation.navigate("chatRooms")}
       />
     </View>
   );

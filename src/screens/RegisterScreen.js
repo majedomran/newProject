@@ -15,7 +15,7 @@ const RegisterScreen = ({ navigation }) => {
     const unsubscribe = auth().onAuthStateChanged(function (user) {
       if (user) {
         console.log("in");
-        navigation.replace("Chat");
+        navigation.replace("chat");
       } else {
         // No user is signed in.
         console.log("out");
