@@ -26,12 +26,12 @@ export const logoutAction = createAsyncThunk(
   async (empty, { rejectWithValue, getState }) => {
     const chatRoomId = "0F112844-B80F-C753-2A07-670CB81692F7";
     console.log("signed Out email:", getState().auth.userEmail);
-    firestore()
-      .collection("chats")
-      .doc(chatRoomId)
-      .collection("users")
-      .doc(getState().auth.userEmail)
-      .delete();
+    // firestore()
+    //   .collection("chats")
+    //   .doc(chatRoomId)
+    //   .collection("users")
+    //   .doc(getState().auth.userEmail)
+    //   .delete();
     return auth()
       .signOut()
       .then(() => {
@@ -62,12 +62,18 @@ const initialState = {
   userID: null,
   userEmail: null,
   logedin: false,
+  photoURL: null
+
 };
 
 const authReducer = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    clearAll: () => initialState,
+    setPhotoURL: (state, action) => {
+      state.photoURL = action.payload
+    },
     setLogedFalse: (state, action) => {
       state.logedin = action.payload;
     },
@@ -86,6 +92,7 @@ const authReducer = createSlice({
   },
 });
 
-export const { setLogedFalse: setLogedFalseAction } = authReducer.actions;
+export const { setLogedFalse: setLogedFalseAction, clearAll: clearAllAction,  setPhotoURL: setPhotoURLAction } =
+  authReducer.actions;
 
 export default authReducer.reducer;

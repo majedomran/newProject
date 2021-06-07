@@ -12,7 +12,7 @@ const LoginScreen = ({ navigation }) => {
   const [loginError, setLoginError] = useState("");
   const [localPassword, setLocalPassword] = useState('12345678')
   useEffect(() => {
-    if (logedin) navigation.replace("chat");
+    if (logedin) navigation.replace("chatRooms");
     return logedin
   },[logedin])
   const signIn = async() => {
@@ -29,8 +29,10 @@ const LoginScreen = ({ navigation }) => {
       userid:   ${userID}
       `
   )
+    // navigation.navigate('chatRooms')
     console.log("logedin: ",logedin);
   };
+  
   return (
     <View style={styles.container}>
       <Input
