@@ -33,11 +33,10 @@ const ChatRooms = ({ navigation }) => {
   const [emailToAdd, setEmailToAdd] = useState();
   const [imgaePath, setImagePath] = useState();
   useEffect(() => {
-    console.log('current user IDtoken: ',auth().currentUser.getIdTokenResult())
     console.log("useEffect in chatrooms");
     console.log("userEmail", userEmail);
     let chats = [];
-    // let users = []
+    let url 
     firestore()
       .collection("chats")
       .where("users", "array-contains", userEmail ? userEmail : "")
@@ -69,28 +68,15 @@ const ChatRooms = ({ navigation }) => {
         console.log("chatsCleab: ", chatsClean);
         dispatch(setChatsReducerAction({chatRooms:chatsClean}));
       });
-      firestore().collection('photos').doc().onSnapshot((snapshot) => {
-        console.log(('photos snapshot => ',snapshot));
-        
-      })
-      storage().ref('70A05D61-14B7-4D66-814A-330FEF88A908.png').getDownloadURL().then((url) => {
-        dispatch(setPhotoURLAction(url))
-        console.log('photoURL response', url)
-      });
       
-      /*
-      adding photo here then => pushing the ref to state reducers
-
-      */
-
-    // console.log('users: ',users);
-
-    // const chat = chats.pop
   }, []);
+  useEffect(() => {
+    
+  }, [])
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-
+  
   const uploadImageToStorage = (path, imageName) => {
     let reference = storage().ref(imageName);
     console.log("storage path: ", path);
@@ -157,6 +143,7 @@ const ChatRooms = ({ navigation }) => {
       }
     });
   };
+  
   const Item = ({ item }) => {
     console.log("item : ", item);
     return (

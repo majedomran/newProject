@@ -1,13 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
+export const addUserToFirestore = createAsyncThunk(
+  "auth/addUserToFirestore",
+  async (user) => {
+    firestore().collection("users").doc(uid).set();
+  }
+);
 export const loginAction = createAsyncThunk(
   "auth/loginAction",
   async (userAuths, { rejectWithValue }) => {
     console.log("loginAction");
     console.log(
       `password: ${userAuths.password} 
-            userEmail: ${userAuths.email}`
+            userEmail: ${userAuths.email}
+          `
     );
     return auth()
       .signInWithEmailAndPassword(userAuths.email, userAuths.password)
@@ -62,8 +69,7 @@ const initialState = {
   userID: null,
   userEmail: null,
   logedin: false,
-  photoURL: null
-
+  photoURL: null,
 };
 
 const authReducer = createSlice({
@@ -72,9 +78,9 @@ const authReducer = createSlice({
   reducers: {
     clearAll: () => initialState,
     setPhotoURL: (state, action) => {
-      state.photoURL = action.payload
+      state.photoURL = action.payload;
     },
-    setLogedFalse: (state, action) => {
+    setLogedin: (state, action) => {
       state.logedin = action.payload;
     },
   },
@@ -92,7 +98,10 @@ const authReducer = createSlice({
   },
 });
 
-export const { setLogedFalse: setLogedFalseAction, clearAll: clearAllAction,  setPhotoURL: setPhotoURLAction } =
-  authReducer.actions;
+export const {
+  setLogedin: setLogedinAction,
+  clearAll: clearAllAction,
+  setPhotoURL: setPhotoURLAction,
+} = authReducer.actions;
 
 export default authReducer.reducer;

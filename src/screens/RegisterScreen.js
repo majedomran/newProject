@@ -2,8 +2,11 @@ import { View, StyleSheet } from "react-native";
 import { Input, Button,Text } from "react-native-elements";
 import React, { useState, useEffect } from "react";
 import auth from "@react-native-firebase/auth";
-
+import { useSelector, useDispatch } from "react-redux";
+import { setLogedinAction, setUserAuthAction} from '../redux/reducers/authReducer'
 const RegisterScreen = ({ navigation }) => {
+  dispatch = useDispatch()
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,11 +14,16 @@ const RegisterScreen = ({ navigation }) => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
   const [registerError,setRegisterError] = useState('')
+
+  // const [ ] = useSelector((state) => state.auth)
+
+  
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(function (user) {
       if (user) {
         console.log("in");
-        navigation.replace("chat");
+        dispatch(setLogedinAction(true))
+        navigation.replace("chatRooms");
       } else {
         // No user is signed in.
         console.log("out");
@@ -29,6 +37,7 @@ const RegisterScreen = ({ navigation }) => {
     auth()
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
+        dispatch(setUserAuthAction())
         console.log("User account created & signed in!");
       })
       .catch((error) => {
