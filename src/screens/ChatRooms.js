@@ -7,7 +7,7 @@ import {
   Text,
   TouchableHighlight,
   Platform,
-  Image
+  Image,
 } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import Feather from "react-native-vector-icons/Feather";
@@ -20,63 +20,91 @@ import { generateGuid } from "../helpers";
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
 import auth from "@react-native-firebase/auth";
-import {setPhotoURLAction} from '../redux/reducers/authReducer'
+import { setPhotoURLAction } from "../redux/reducers/authReducer";
+import _ from "lodash";
+
 const ChatRooms = ({ navigation }) => {
   dispatch = useDispatch();
 
   const { chatRooms } = useSelector((state) => state.chats);
   const { userEmail, logedin } = useSelector((state) => state.auth);
-  const { photoURL } = useSelector((state) => state.auth)
-
+  const { photoURL } = useSelector((state) => state.auth);
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [emailToAdd, setEmailToAdd] = useState();
   const [imgaePath, setImagePath] = useState();
   useEffect(() => {
-    console.log("useEffect in chatrooms");
-    console.log("userEmail", userEmail);
+    // console.log("useEffect in chatrooms");
+    // console.log("userEmail", userEmail);
     let chats = [];
-    let url 
+    let url;
     firestore()
       .collection("chats")
       .where("users", "array-contains", userEmail ? userEmail : "")
       .get()
       .then((snapshots) => {
         snapshots.docs.forEach((snapshot) => {
-          console.log("snapshot", snapshot);
+          // console.log("snapshot", snapshot);
           chats.push({ id: snapshot.id, users: snapshot._data.users });
           // users.push(snapshot._data.users)
         });
       })
       .then(() => {
-        console.log('chat .then <= ')
+        console.log("chat .then <= ");
         let chatsClean = [];
+        let users = [];
         chats.forEach((chat) => {
           // console.log('user => ', chat);
           chat.users.forEach((user) => {
             // console.log('user => ', user);
             if (!user.includes(userEmail)) {
               // console.log('user contains => ', user);
-              chatsClean.push({ id: chat.id, users: user });
+              users.push(user);
+              chatsClean.push({ id: chat.id, email: user });
             }
           });
-
-          // if(chat.users.contains('majed1@gmail.com'))
-          //   console.log('chat users => ',chat.users);
         });
-        console.log("chats: ", chats);
-        console.log("chatsCleab: ", chatsClean);
-        dispatch(setChatsReducerAction({chatRooms:chatsClean}));
+        let chatsWithPhotos = []
+        firestore()
+          .collection("users")
+          .where("email", "in", users)
+          .get()
+          .then((res) => {
+            console.log('res from photos',res.docs);
+            let photosArray = []
+            res.docs.forEach((photo) => {
+              photosArray.push(photo._data)
+            })
+            chatsClean.forEach((chat) => {
+              
+              let found = false
+              photosArray.forEach((photo) => {
+                if(chat.email === photo.email){
+                  found = true
+                chatsWithPhotos.push({id:chat.id,email:chat.email,photo:photo.photo})
+                }
+
+              })
+              if(found === false)
+              chatsWithPhotos.push({id:chat.id,email:chat.email,photo:null})
+            })
+            console.log('chatsWithPhotos ',chatsWithPhotos);
+            // let arr = _.intersectionBy(chatsClean,photosArray,"email") 
+            // console.log('array from union: ',arr);
+            
+            console.log("chats: ", chats);
+            console.log("chatsClean: ", chatsClean);
+            dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
+          });
       });
-      
   }, []);
-  useEffect(() => {
-    
-  }, [])
+  // useEffect(() => {
+  //   firestore().collection('users').doc().
+  // }, [])
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  
+
   const uploadImageToStorage = (path, imageName) => {
     let reference = storage().ref(imageName);
     console.log("storage path: ", path);
@@ -87,7 +115,10 @@ const ChatRooms = ({ navigation }) => {
       .then((res) => {
         // 4
         console.log("respone from storage firebase", res);
-        firestore().collection('photos').doc(generateGuid()).set({email:userEmail,photoURL:res.metadata.fullPath})
+        firestore()
+          .collection("photos")
+          .doc(generateGuid())
+          .set({ email: userEmail, photoURL: res.metadata.fullPath });
         console.log("Image uploaded to the bucket!");
       })
       .catch((e) => console.log("uploading image error => ", e));
@@ -143,9 +174,9 @@ const ChatRooms = ({ navigation }) => {
       }
     });
   };
-  
+
   const Item = ({ item }) => {
-    console.log("item : ", item);
+    // console.log("item : ", item);
     return (
       <TouchableHighlight
         style={styles.button}
@@ -153,15 +184,16 @@ const ChatRooms = ({ navigation }) => {
           navigation.navigate("chat", { chatID: item.id, userEmail })
         }
       >
-        <View style={{alignItems:"baseline",margin:2,flexDirection:"row"}}>
-      
-        <Image
-        style={{width: 50, height: 50,marginRight:15}}
-        source={{
-          uri: photoURL,
-        }}
-      />
-          <Text style={styles.title}>{item.users}</Text>
+        <View
+          style={{ alignItems: "baseline", margin: 2, flexDirection: "row" }}
+        >
+          <Image
+            style={{ width: 50, height: 50, marginRight: 15 }}
+            source={{
+              uri: item.photo,
+            }}
+          />
+          <Text style={styles.title}>{item.email}</Text>
         </View>
       </TouchableHighlight>
     );
@@ -192,6 +224,8 @@ const ChatRooms = ({ navigation }) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
+        <View>
+
         <View style={{ marginLeft: 20 }}>
           <Feather
             name="arrow-left"
@@ -199,6 +233,16 @@ const ChatRooms = ({ navigation }) => {
             color="black"
             onPress={signOut}
           />
+        </View>
+        <View style={{marginRight: 20}}>
+
+          <Feather
+            name="arrow-right"
+            size={40}
+            color="black"
+            onPress={signOut}
+          />
+        </View>
         </View>
       ),
 
@@ -209,7 +253,6 @@ const ChatRooms = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <FlatList
-    
         data={chatRooms}
         renderItem={Item}
         keyExtractor={(item) => item.id}
@@ -243,6 +286,7 @@ const ChatRooms = ({ navigation }) => {
               }}
             ></Input>
             <Button title="ADD" onPress={addChat} />
+            <Button title="Cancel" onPress={toggleModal} />
           </View>
         </Modal>
       </View>

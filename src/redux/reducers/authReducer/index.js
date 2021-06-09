@@ -3,8 +3,14 @@ import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 export const addUserToFirestore = createAsyncThunk(
   "auth/addUserToFirestore",
-  async (user) => {
-    firestore().collection("users").doc(uid).set();
+  async (url) => {
+    const user = auth().currentUser
+    console.log(user);
+    
+    firestore().collection("users").doc(user.uid).set({
+      email:user.email,
+      photo:url
+    });
   }
 );
 export const loginAction = createAsyncThunk(
