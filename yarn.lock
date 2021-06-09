@@ -5495,6 +5495,11 @@ react-native-axios@^0.17.1:
   dependencies:
     follow-redirects "0.0.7"
 
+react-native-bottom-bar@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/react-native-bottom-bar/-/react-native-bottom-bar-0.3.3.tgz#095ffdd3517244ed512bb4d1b1c9689966c90c72"
+  integrity sha512-OlztB9m6CK/sM+mX6NjrPNs7FEAlK48AxYcKrS4axSy/PM2/JQzUcDhCIwxGRg7wRvvnRAorpwHql3HWvu0lyw==
+
 react-native-codegen@^0.0.6:
   version "0.0.6"
   resolved "https://registry.npmjs.org/react-native-codegen/-/react-native-codegen-0.0.6.tgz"

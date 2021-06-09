@@ -44,7 +44,7 @@ const ChatRooms = ({ navigation }) => {
       .get()
       .then((snapshots) => {
         snapshots.docs.forEach((snapshot) => {
-          // console.log("snapshot", snapshot);
+          console.log("snapshot", snapshot);
           chats.push({ id: snapshot.id, users: snapshot._data.users });
           // users.push(snapshot._data.users)
         });
@@ -58,44 +58,63 @@ const ChatRooms = ({ navigation }) => {
           chat.users.forEach((user) => {
             // console.log('user => ', user);
             if (!user.includes(userEmail)) {
-              // console.log('user contains => ', user);
+              console.log('user contains => ', user);
               users.push(user);
               chatsClean.push({ id: chat.id, email: user });
             }
           });
         });
         let chatsWithPhotos = []
-        firestore()
+        console.log('users are => ',users);
+        console.log('chatsClean are => ',chatsClean);
+        for (let index = 0; index < Math.ceil(users.length/10); index++) {
+          console.log('loop',Math.ceil(users.length/10));
+          
+          let paginatedUsers = []
+          let paginatedChatsClean = []
+          for (let j = 0; j < 10; j++) {
+            paginatedUsers[j] = users[(index * 10)+j];
+            paginatedChatsClean[j] = chatsClean[(index * 10)+j]
+          }
+          console.log('paginated users: ',paginatedUsers);
+          
+          firestore()
           .collection("users")
-          .where("email", "in", users)
+          .where("email", "in", paginatedUsers)
           .get()
           .then((res) => {
-            console.log('res from photos',res.docs);
-            let photosArray = []
-            res.docs.forEach((photo) => {
-              photosArray.push(photo._data)
-            })
-            chatsClean.forEach((chat) => {
+            console.log('requesting from firestore photos');
               
-              let found = false
-              photosArray.forEach((photo) => {
-                if(chat.email === photo.email){
-                  found = true
-                chatsWithPhotos.push({id:chat.id,email:chat.email,photo:photo.photo})
-                }
-
+              console.log('res from photos',res.docs);
+              let photosArray = []
+              res.docs.forEach((photo) => {
+                photosArray.push(photo._data)
               })
-              if(found === false)
-              chatsWithPhotos.push({id:chat.id,email:chat.email,photo:null})
-            })
-            console.log('chatsWithPhotos ',chatsWithPhotos);
-            // let arr = _.intersectionBy(chatsClean,photosArray,"email") 
-            // console.log('array from union: ',arr);
+              paginatedChatsClean.forEach((chat) => {
+                
+                let found = false
+                photosArray.forEach((photo) => {
+                  if(chat.email === photo.email){
+                    found = true
+                  chatsWithPhotos.push({id:chat.id,email:chat.email,photo:photo.photo})
+                  }
+  
+                })
+                if(found === false)
+                chatsWithPhotos.push({id:chat.id,email:chat.email,photo:null})
+              })
+              console.log('chatsWithPhotos ',chatsWithPhotos);
+              // let arr = _.intersectionBy(chatsClean,photosArray,"email") 
+              // console.log('array from union: ',arr);
+              
+              console.log("chats: ", chats);
+              console.log("chatsClean: ", chatsClean);
+              dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
+            }).catch((e) => {
+              console.log('error: ',e);
+        })
             
-            console.log("chats: ", chats);
-            console.log("chatsClean: ", chatsClean);
-            dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
-          });
+          };
       });
   }, []);
   // useEffect(() => {
@@ -224,7 +243,7 @@ const ChatRooms = ({ navigation }) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View>
+
 
         <View style={{ marginLeft: 20 }}>
           <Feather
@@ -234,16 +253,7 @@ const ChatRooms = ({ navigation }) => {
             onPress={signOut}
           />
         </View>
-        <View style={{marginRight: 20}}>
-
-          <Feather
-            name="arrow-right"
-            size={40}
-            color="black"
-            onPress={signOut}
-          />
-        </View>
-        </View>
+        
       ),
 
       headerRight: () => <TouchableOpacity></TouchableOpacity>,
