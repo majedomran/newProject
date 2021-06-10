@@ -38,6 +38,8 @@ const ChatRooms = ({ navigation }) => {
     // console.log("userEmail", userEmail);
     let chats = [];
     let url;
+    console.log("current user is: ",userEmail);
+    
     firestore()
       .collection("chats")
       .where("users", "array-contains", userEmail ? userEmail : "")
@@ -142,18 +144,13 @@ const ChatRooms = ({ navigation }) => {
       })
       .catch((e) => console.log("uploading image error => ", e));
   };
-  const getPlatformPath = (uri) => {
-    console.log(
-      `
-      
-      uri: ${uri}`
-    );
 
-    return Platform.select({
-      // android: { path },
-      ios: { uri },
-    });
-  };
+
+    // return Platform.select({
+    //   // android: { path },
+    //   ios: { uri },
+    // });
+  
   const getFileName = (name, path) => {
     if (name != null) {
       return name;
@@ -226,11 +223,6 @@ const ChatRooms = ({ navigation }) => {
     dispatch(clearAllAction());
     // navigation.replace("login");
   };
-  const addImage = () => {
-    launchImageLibrary({ quality: 1 }, (response) => {
-      console.log(response);
-    });
-  };
   const addChat = () => {
     toggleModal();
     console.log("adding email: ", emailToAdd);
@@ -240,26 +232,6 @@ const ChatRooms = ({ navigation }) => {
       .doc(Guid)
       .set({ users: [userEmail, emailToAdd === null ? "" : emailToAdd] });
   };
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-
-
-        <View style={{ marginLeft: 20 }}>
-          <Feather
-            name="arrow-left"
-            size={40}
-            color="black"
-            onPress={signOut}
-          />
-        </View>
-        
-      ),
-
-      headerRight: () => <TouchableOpacity></TouchableOpacity>,
-    });
-  }, [navigation]);
-
   return (
     <View style={styles.container}>
       <FlatList
@@ -300,7 +272,7 @@ const ChatRooms = ({ navigation }) => {
           </View>
         </Modal>
       </View>
-      <Button title="ADD" onPress={chooseFile} />
+     
     </View>
   );
 };

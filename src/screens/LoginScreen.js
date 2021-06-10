@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Input, Button, Text } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
-import { setUserAuthAction, loginAction } from "../redux/reducers/authReducer";
+import { setUserAuthAction, loginAction, setLogedinAction } from "../redux/reducers/authReducer";
 import { useSelector, useDispatch } from "react-redux";
 const LoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -12,7 +12,7 @@ const LoginScreen = ({ navigation }) => {
   const [loginError, setLoginError] = useState("");
   const [localPassword, setLocalPassword] = useState('12345678')
   useEffect(() => {
-    if (logedin) navigation.replace("chatRooms");
+    if (logedin) navigation.replace("chatsProfileSwitcher");
     return logedin
   },[logedin])
   const signIn = async() => {
@@ -23,6 +23,7 @@ const LoginScreen = ({ navigation }) => {
   )
     await dispatch(loginAction({ email: localEmail, password: localPassword }));
     await dispatch(setUserAuthAction())
+    // await dispatch(setLogedinAction(true))
     console.log(
       `password:  ${userPassword}
       userEmail: ${userEmail}
@@ -57,7 +58,7 @@ const LoginScreen = ({ navigation }) => {
       <Button
         title="ChatRooms"
         style={styles.button}
-        onPress={() => navigation.navigate("chatRooms")}
+        onPress={() => navigation.navigate("chatsProfileSwitcher")}
       />
     </View>
   );

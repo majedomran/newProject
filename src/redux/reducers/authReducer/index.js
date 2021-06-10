@@ -34,6 +34,7 @@ export const loginAction = createAsyncThunk(
       });
   }
 );
+
 export const logoutAction = createAsyncThunk(
   "auth/logoutAction",
   async (empty, { rejectWithValue, getState }) => {
@@ -63,11 +64,27 @@ export const setUserAuthAction = createAsyncThunk(
   async () => {
     let user = auth().currentUser;
     console.log("user: ", user);
-
-    return {
-      userID: user.uid,
-      userEmail: user.email,
-    };
+    return await firestore().collection('users').where("email","==",user.email).get().then((URL) => {
+      console.log('getting photo: ',URL.docs);
+      
+      return {
+        userID: user.uid,
+        userEmail: user.email,
+        photoURL:URL.docs[0]?._data.photo
+      };
+    }).catch((e) => {
+      console.log('error',e);
+      
+    }).finally((res) => {
+      console.log("finally: ", res);
+      
+      
+    })
+    // return {
+    //   userID: user.uid,
+    //   userEmail: user.email,
+    //   // photoURL:URL.docs?.[0]._data.photo
+    // };
   }
 );
 
@@ -91,15 +108,17 @@ const authReducer = createSlice({
     },
   },
   extraReducers: {
-    [loginAction.fulfilled]: (state, action) => {
-      state.logedin = action.payload;
-    },
+    // [loginAction.fulfilled]: (state, action) => {
+    //   state.logedin = action.payload;
+    // },
     [logoutAction.fulfilled]: (state, action) => {
       state.logedin = action.payload;
     },
     [setUserAuthAction.fulfilled]: (state, action) => {
       state.userID = action.payload.userID;
       state.userEmail = action.payload.userEmail;
+      state.photoURL = action.payload.photoURL
+      state.logedin = true
     },
   },
 });
