@@ -7,11 +7,12 @@ import {
   setLogedinAction,
   setUserAuthAction,
   addUserToFirestore,
+  setPhotoURLAction,
 } from "../redux/reducers/authReducer";
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
 import firestore from "@react-native-firebase/firestore";
-import styles from '../styles/registerScreenStyles'
+import styles from "../styles/registerScreenStyles";
 const RegisterScreen = ({ navigation }) => {
   dispatch = useDispatch();
 
@@ -24,7 +25,7 @@ const RegisterScreen = ({ navigation }) => {
   const [registerError, setRegisterError] = useState("");
   const [localPath, setLocalPath] = useState("");
   const [fileName, setFileName] = useState("");
-  const [fileNameResponse, setFileNameResponse] = useState("")
+  const [fileNameResponse, setFileNameResponse] = useState("");
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -39,7 +40,7 @@ const RegisterScreen = ({ navigation }) => {
 
     return unsubscribe;
   }, []);
-  const uploadImageToStorage = async(path, imageName) => {
+  const uploadImageToStorage = async (path, imageName) => {
     let reference = storage().ref(imageName);
     console.log("storage path: ", path);
 
@@ -47,12 +48,15 @@ const RegisterScreen = ({ navigation }) => {
 
     await task
       .then((res) => {
-        console.log('response from storage uploading: ',res);
-        storage().ref(res.metadata.fullPath).getDownloadURL().then((url) => {
-          console.log('url from storage => ',url);
-          dispatch(addUserToFirestore(url))
-          
-        })
+        console.log("response from storage uploading: ", res);
+        storage()
+          .ref(res.metadata.fullPath)
+          .getDownloadURL()
+          .then((url) => {
+            console.log("url from storage => ", url);
+            dispatch(addUserToFirestore(url));
+            dispatch(setPhotoURLAction(url));
+          });
         // storage().ref(res)
       })
       .catch((e) => console.log("uploading image error => ", e));
@@ -105,7 +109,7 @@ const RegisterScreen = ({ navigation }) => {
           fileName: ${response.fileName}`
         );
         setLocalPath(response.assets[0].uri);
-        setFileNameResponse(response.fileName)
+        setFileNameResponse(response.fileName);
         // setImagePath({ imagePath: path });
         // uploadImageToStorage(localPath, fileName);
       }
@@ -118,14 +122,20 @@ const RegisterScreen = ({ navigation }) => {
     auth()
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
-        uploadImageToStorage(localPath, getFileName(fileNameResponse, localPath));
-        console.log('localPath: ', localPath)
-        console.log('the filename is: ', getFileName(fileNameResponse, localPath))
+        uploadImageToStorage(
+          localPath,
+          getFileName(fileNameResponse, localPath)
+        );
+        console.log("localPath: ", localPath);
+        console.log(
+          "the filename is: ",
+          getFileName(fileNameResponse, localPath)
+        );
 
-        dispatch(setUserAuthAction())
-        
-        dispatch(setLogedinAction(true))
-          
+        dispatch(setUserAuthAction());
+
+        dispatch(setLogedinAction(true));
+
         console.log("User account created & signed in!");
       })
       .catch((error) => {
@@ -171,4 +181,3 @@ const RegisterScreen = ({ navigation }) => {
   );
 };
 export default RegisterScreen;
-

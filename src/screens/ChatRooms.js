@@ -28,6 +28,13 @@ const ChatRooms = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [emailToAdd, setEmailToAdd] = useState();
   useEffect(() => {
+    firestore().collection('chats').onSnapshot((snapshot) => {
+      console.log('new snapshot ',snapshot);
+      getChats()
+    })
+    
+  }, []);
+  const getChats = () => {
     let chats = [];
     console.log("current user is: ", userEmail);
     firestore()
@@ -57,13 +64,13 @@ const ChatRooms = ({ navigation }) => {
         console.log("users are => ", users);
         console.log("chatsClean are => ", chatsClean);
         for (let index = 0; index < Math.ceil(users.length / 10); index++) {
-          console.log("loop", Math.ceil(users.length / 10));
+          // console.log("loop", Math.ceil(users.length / 10));
 
           let paginatedUsers = [];
           let paginatedChatsClean = [];
           for (let j = 0; j < 10; j++) {
             if (users[j] !== undefined) {
-              console.log("copying loop", j);
+              // console.log("copying loop", j);
 
               paginatedUsers[j] = users[index * 10 + j];
               paginatedChatsClean[j] = chatsClean[index * 10 + j];
@@ -107,17 +114,23 @@ const ChatRooms = ({ navigation }) => {
                     });
                 });
                 console.log("chatsWithPhotos ", chatsWithPhotos);
-                // let arr = _.intersectionBy(chatsClean,photosArray,"email")
-                // console.log('array from union: ',arr);
 
                 console.log("chats: ", chats);
                 console.log("chatsClean: ", chatsClean);
                 dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
               } else {
+                paginatedChatsClean.forEach((chat, index) => {
+                  chatsWithPhotos.push({
+                    id: chat.id,
+                    email: chat.email,
+                    photo: null,
+                  })
+                })
+
                 console.log("photoarray is empty");
                 console.log("chats: ", chats);
                 console.log("chatsClean: ", chatsClean);
-                dispatch(setChatsReducerAction({ chatRooms: chatsClean }));
+                dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
               }
             })
             .catch((e) => {
@@ -125,7 +138,7 @@ const ChatRooms = ({ navigation }) => {
             });
         }
       });
-  }, [chatRooms]);
+  }
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
@@ -239,7 +252,12 @@ const ChatRooms = ({ navigation }) => {
     var req = firestore()
       .collection("chats")
       .doc(Guid)
-      .set({ users: [userEmail, emailToAdd === null ? "" : emailToAddSmall] });
+      .set({ users: [userEmail, emailToAdd === null ? "" : emailToAddSmall] }).then(() => {
+        getChats()
+      }).catch((e) => {
+        console.log('error', e);
+        
+      });
   };
   return (
     <View style={styles.container}>
