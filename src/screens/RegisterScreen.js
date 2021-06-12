@@ -11,7 +11,7 @@ import {
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
 import firestore from "@react-native-firebase/firestore";
-
+import styles from '../styles/registerScreenStyles'
 const RegisterScreen = ({ navigation }) => {
   dispatch = useDispatch();
 
@@ -171,14 +171,4 @@ const RegisterScreen = ({ navigation }) => {
   );
 };
 export default RegisterScreen;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-  },
-  button: {
-    width: 200,
-    marginTop: 10,
-  },
-});
+

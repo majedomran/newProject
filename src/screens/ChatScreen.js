@@ -8,7 +8,7 @@ import _ from "lodash";
 import { useDispatch } from "react-redux";
 import {generateGuid} from '../helpers'
 import {addChatsToStoreAction} from '../redux/reducers/chatMessagesReducer'
-
+import styles from '../styles/chatScreenStyles'
 Feather.loadFont();
 const ChatScreen = ({route, navigation }) => {
   dispatch = useDispatch();
@@ -95,7 +95,7 @@ const ChatScreen = ({route, navigation }) => {
     navigation.setOptions({
       title: users.split('@')[0],
       headerLeft: () => (
-        <View style={{ marginLeft: 20 }}>
+        <View style={styles.backButton}>
           <Feather
             name="arrow-left"
             size={40}

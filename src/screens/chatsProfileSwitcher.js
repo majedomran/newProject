@@ -7,9 +7,13 @@ import ChatRooms from "./ChatRooms"
 import profileScreen from "./profileScreen"
 
 import {clearAllAction, logoutAction} from "../redux/reducers/authReducer"
+import { chatsClearAllAction } from "../redux/reducers/chatsReducer";
+
+import styles from '../styles/chatsProfileSwitcherStyles'
 const Tab = createBottomTabNavigator();
 function chatsProfileSwitcher({navigation}) {
     const signOut = () => {
+      dispatch(chatsClearAllAction())
         dispatch(logoutAction());
         dispatch(clearAllAction());
         // navigation.replace("login");
@@ -19,7 +23,7 @@ function chatsProfileSwitcher({navigation}) {
       headerLeft: () => (
 
         
-        <View style={{ marginLeft: 20 }}>
+        <View style={styles.backButton}>
           <Feather
             name="arrow-left"
             size={40}

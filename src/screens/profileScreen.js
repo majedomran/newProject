@@ -1,18 +1,14 @@
-import { View, StyleSheet, Button } from "react-native";
-import { Input, Text, Image } from "react-native-elements";
-import React, { useState, useEffect } from "react";
-import auth from "@react-native-firebase/auth";
-import { useSelector, useDispatch } from "react-redux";
+import { View,  Button } from "react-native";
+import {  Text, Image } from "react-native-elements";
+import React, {  useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
-  setLogedinAction,
-  setUserAuthAction,
   addUserToFirestore,
   setPhotoURLAction
 } from "../redux/reducers/authReducer";
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
-import firestore from "@react-native-firebase/firestore";
-
+import styles from '../styles/profileScreen'
 const profileScreen = ({ navigation }) => {
   const { userEmail, photoURL } = useSelector((state) => state.auth);
   useEffect(() => {
@@ -88,16 +84,16 @@ const profileScreen = ({ navigation }) => {
   
 
   return (
-    <View style={{ margin: 50, alignItems: "center" }}>
-      <Text style={{ margin: 50, fontSize: 14 }}>Hello {userEmail}</Text>
+    <View style={styles.view}>
+      <Text style={styles.text}>Hello {userEmail}</Text>
       <Image
-        style={{ width: 200, height: 200 }}
+        style={styles.image}
         source={{
           uri: photoURL,
         }}
       />
       <Button
-        style={{ fontSize: 20, color: "green" }}
+        style={styles.button}
         styleDisabled={{ color: "red" }}
         title={photoURL ? "Change photo" : "Add photo"}
         onPress={chooseFile}

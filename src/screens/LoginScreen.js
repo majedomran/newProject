@@ -4,6 +4,7 @@ import { Input, Button, Text } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
 import { setUserAuthAction, loginAction, setLogedinAction } from "../redux/reducers/authReducer";
 import { useSelector, useDispatch } from "react-redux";
+import styles from '../styles/loginScreenStyles'
 const LoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { userID, userEmail, logedin, userPassword } = useSelector((state) => state.auth);
@@ -60,14 +61,4 @@ const LoginScreen = ({ navigation }) => {
 };
 
 export default LoginScreen;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-  },
-  button: {
-    width: 200,
-    marginTop: 10,
-  },
-});
+

@@ -13,15 +13,16 @@ const chatsReducer = createSlice({
   name: "chats",
   initialState,
   reducers: {
-    
+    clearAll: () => initialState,
+
     setChatsReducer: (state, action) => {
-        // console.log("payload: ",action.payload);
+       
         
       state.chatRooms = action.payload.chatRooms
     },
   },
 });
 
-export const { setChatsReducer: setChatsReducerAction } = chatsReducer.actions;
+export const { setChatsReducer: setChatsReducerAction, clearAll:chatsClearAllAction } = chatsReducer.actions;
 
 export default chatsReducer.reducer;
