@@ -224,7 +224,7 @@ const ChatRooms = ({ navigation }) => {
   };
   //logout
   useEffect(() => {
-    if (!logedin) navigation.replace("login");
+    if (!logedin) navigation.popToTop();
   }, [logedin]);
   const signOut = () => {
     dispatch(logoutAction());
@@ -250,8 +250,8 @@ const ChatRooms = ({ navigation }) => {
         keyExtractor={(item) => item.id}
       />
       <Feather
-        name="plus"
-        size={65}
+        name="user-plus"
+        size={35}
         onPress={toggleModal}
         style={styles.addChatButton}
       />

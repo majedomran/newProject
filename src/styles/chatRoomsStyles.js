@@ -12,8 +12,8 @@ const styles = StyleSheet.create({
   },
   addChatButton: {
     position: "absolute",
-    right: 15,
-    bottom: 15,
+    right: 0,
+    bottom: 0,
     alignItems: "center",
     justifyContent: "center",
     width: 70,

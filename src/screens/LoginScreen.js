@@ -13,7 +13,7 @@ const LoginScreen = ({ navigation }) => {
   const [loginError, setLoginError] = useState("");
   const [localPassword, setLocalPassword] = useState('12345678')
   useEffect(() => {
-    if (logedin) navigation.replace("chatsProfileSwitcher");
+    if (logedin) navigation.navigate("chatsProfileSwitcher");
     return logedin
   },[logedin])
   const signIn = async() => {
