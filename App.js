@@ -28,7 +28,7 @@ const App = () => {
           <Stack.Screen name="login" component={LoginScreen} />
           <Stack.Screen name="register" component={RegisterScreen} />
           <Stack.Screen name="profileScreen" component={profileScreen} />
-          <Stack.Screen name="chatsProfileSwitcher" component={chatsProfileSwitcher}/>
+          <Stack.Screen name="chatsProfileSwitcher" component={chatsProfileSwitcher} options={{title:'IChat'}}/>
           <Stack.Screen
             name="chat"
             component={ChatScreen}

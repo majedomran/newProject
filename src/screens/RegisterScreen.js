@@ -164,7 +164,7 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={(text) => setPassword(text)}
         secureTextEntry
       />
-      <Button title="ADD" onPress={chooseFile} />
+      <Button title="Add Photo" onPress={chooseFile} />
       <Text style={{ color: "red" }}>{registerError}</Text>
       <Button title="register" style={styles.button} onPress={register} />
     </View>

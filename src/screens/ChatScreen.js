@@ -5,27 +5,21 @@ import { Bubble, GiftedChat } from "react-native-gifted-chat";
 import Feather from "react-native-vector-icons/Feather";
 import firestore from "@react-native-firebase/firestore";
 import _ from "lodash";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  logoutAction,
-  setLogedFalseAction,
-} from "../redux/reducers/authReducer";
+import { useDispatch } from "react-redux";
+import {generateGuid} from '../helpers'
+import {addChatsToStoreAction} from '../redux/reducers/chatMessagesReducer'
+
 Feather.loadFont();
-import generateGuid from '../helpers'
 const ChatScreen = ({route, navigation }) => {
   dispatch = useDispatch();
-  // const { logedin, userEmail } = useSelector((state) => state.auth);
-  
   const [messages, setMessages] = useState([]);
-  // const [chatRoomId, setChatRoomId] = useState(
-  //   "0F112844-B80F-C753-2A07-670CB81692F7"
-  //   );
-    const [currentUsers, setCurrentUsers] = useState(email);
-    let email = "majed1@gmail.com";
     
-    const { chatID, userEmail } = route.params;
+    
+    
+    const { chatID, userEmail, users } = route.params;
     
     useEffect(() => {
+      // dispatch(addChatsToStoreAction(chatID,userEmail,messages))
       console.log(
         `route params:
         chatID: ${chatID}
@@ -33,9 +27,6 @@ const ChatScreen = ({route, navigation }) => {
         `
       )
     const fireMessages = [];
-    firestore().collection('chats').where("users", "array-contains","majed1@gmail.com" ).get().then((snapshot) => {
-      console.log("users snapshot",snapshot.docs)
-    });
     firestore()
       .collection("chats")
       .doc(chatID)
@@ -63,45 +54,6 @@ const ChatScreen = ({route, navigation }) => {
         );
       });
     console.log("updated");
-    // let users = [];
-    // firestore()
-    //   .collection("chats")
-    //   .doc(chatRoomId)
-    //   .collection("users")
-    //   .onSnapshot((snapshot) => {
-    //     users = [];
-    //     snapshot.docs.forEach((doc) => {
-    //       users.push(doc.data().user);
-    //     });
-    //     let usersTitle = "";
-    //     users.forEach((user) => {
-    //       usersTitle = usersTitle.concat(`${user.split("@", 1)},`);
-    //     });
-
-    //     navigation.setOptions({
-    //       title: usersTitle,
-    //     });
-
-    //     console.log("current users", usersTitle);
-    //   });
-  }, []);
-  useEffect(() => {
-    // console.log("userEmail in chatscreen is: ", userEmail);
-    // firestore()
-    //   .collection("chats")
-    //   .doc(chatRoomId)
-    //   .collection("users")
-    //   .doc(userEmail)
-    //   .set({
-    //     user: userEmail,
-    //     timeStamp: new Date().toISOString(),
-    //   })
-    //   .then(() => {
-    //     console.log("user updated");
-    //   })
-    //   .catch((err) => {
-    //     console.log("firebase error", err);
-    //   });
   }, []);
 
   const onSend = (messages = []) => {
@@ -128,10 +80,7 @@ const ChatScreen = ({route, navigation }) => {
       });
   };
   const signOut = async () => {
-    navigation.replace('chatRooms')
-    // dispatch(logoutAcion());
-    // dispatch(setLogedFalseAction(false))
-    // deleteUser()
+    navigation.navigate('chatRooms')
   };
   const deleteUser = () => {
     firestore()
@@ -144,7 +93,7 @@ const ChatScreen = ({route, navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: currentUsers,
+      title: users.split('@')[0],
       headerLeft: () => (
         <View style={{ marginLeft: 20 }}>
           <Feather

@@ -195,13 +195,14 @@ const ChatRooms = ({ navigation }) => {
     // console.log("item : ", item);
     return (
       <TouchableHighlight
-        style={styles.button}
+
+        style={{marginBottom:10}}
         onPress={() =>
-          navigation.navigate("chat", { chatID: item.id, userEmail })
+          navigation.navigate("chat", { chatID: item.id, userEmail, users:item.email })
         }
       >
         <View
-          style={{ alignItems: "baseline", margin: 2, flexDirection: "row" }}
+          style={{ alignItems: "baseline",flexDirection: "row", borderWidth:1,alignSelf:"stretch" }}
         >
           <Image
             style={{ width: 50, height: 50, marginRight: 15 }}
@@ -209,7 +210,7 @@ const ChatRooms = ({ navigation }) => {
               uri: item.photo,
             }}
           />
-          <Text style={styles.title}>{item.email}</Text>
+          <Text style={{alignSelf:"center"}}>{item.email}</Text>
         </View>
       </TouchableHighlight>
     );
@@ -232,14 +233,52 @@ const ChatRooms = ({ navigation }) => {
       .doc(Guid)
       .set({ users: [userEmail, emailToAdd === null ? "" : emailToAdd] });
   };
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+
+        
+        <View style={{ marginLeft: 20 }}>
+          <Feather
+            name="arrow-right"
+            size={40}
+            color="black"
+            onPress={signOut}
+          />
+        </View>
+        
+      ),
+
+    //   headerRight: () => <TouchableOpacity></TouchableOpacity>,
+    });
+  }, [navigation]);
   return (
     <View style={styles.container}>
-      <FlatList
+      <FlatList 
+        style={{alignContent:"flex-start",alignSelf:"stretch"}}
         data={chatRooms}
         renderItem={Item}
         keyExtractor={(item) => item.id}
       />
-      <TouchableOpacity
+      <Feather
+            name="plus"
+            size={65}
+            // color="black"
+            onPress={toggleModal}
+            style={{
+              position: "absolute",
+              right: 15,
+              bottom: 15,
+              // borderWidth: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              width: 70,
+              height: 70,
+              // backgroundColor: "#ccc",
+              // borderRadius: 50,
+            }}
+          />
+      {/* <TouchableOpacity
         onPress={toggleModal}
         style={{
           position: "absolute",
@@ -253,10 +292,10 @@ const ChatRooms = ({ navigation }) => {
           backgroundColor: "#ccc",
           borderRadius: 50,
         }}
-      ></TouchableOpacity>
+      ></TouchableOpacity> */}
       <View style={{ flex: 1 }}>
         <Modal
-          style={{ margin: 100, marginTop: 400 }}
+          style={{ margin: 100, marginTop: 400}}
           isVisible={isModalVisible}
         >
           <View style={{ flex: 1 }}>
@@ -267,7 +306,7 @@ const ChatRooms = ({ navigation }) => {
                 setEmailToAdd(text);
               }}
             ></Input>
-            <Button title="ADD" onPress={addChat} />
+            <Button title="ADD" onPress={addChat} style={{marginBottom:20}}/>
             <Button title="Cancel" onPress={toggleModal} />
           </View>
         </Modal>
@@ -283,6 +322,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "flex-start",
     padding: 10,
+
   },
   button: {
     width: 200,

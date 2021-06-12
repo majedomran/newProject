@@ -55,11 +55,6 @@ const LoginScreen = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate("register")}
       />
-      <Button
-        title="ChatRooms"
-        style={styles.button}
-        onPress={() => navigation.navigate("chatsProfileSwitcher")}
-      />
     </View>
   );
 };

@@ -8,7 +8,6 @@ import profileScreen from "./profileScreen"
 
 import {clearAllAction, logoutAction} from "../redux/reducers/authReducer"
 const Tab = createBottomTabNavigator();
-
 function chatsProfileSwitcher({navigation}) {
     const signOut = () => {
         dispatch(logoutAction());
@@ -19,7 +18,7 @@ function chatsProfileSwitcher({navigation}) {
     navigation.setOptions({
       headerLeft: () => (
 
-
+        
         <View style={{ marginLeft: 20 }}>
           <Feather
             name="arrow-left"
@@ -36,8 +35,10 @@ function chatsProfileSwitcher({navigation}) {
   }, [navigation]);
   return (
     <Tab.Navigator>
-      <Tab.Screen name="chatRooms" component={ChatRooms} />
-      <Tab.Screen name="profile" component={profileScreen} />
+      <Tab.Screen name="chatRooms" component={ChatRooms} 
+      options={{tabBarLabel:'Chats'}}
+      />
+      <Tab.Screen name="profile" component={profileScreen} options={{tabBarLabel:'Profile'}} />
     </Tab.Navigator>
   );
 }
