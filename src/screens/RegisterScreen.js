@@ -30,10 +30,7 @@ const RegisterScreen = ({ navigation }) => {
     const unsubscribe = auth().onAuthStateChanged(function (user) {
       if (user) {
         console.log("in");
-        // dispatch(setLogedinAction(true));
-        // navigation.replace("chatRooms");
       } else {
-        // No user is signed in.
         console.log("out");
       }
     });
@@ -42,13 +39,11 @@ const RegisterScreen = ({ navigation }) => {
   }, []);
   const uploadImageToStorage = async (path, imageName) => {
     let reference = storage().ref(imageName);
-    console.log("storage path: ", path);
 
     let task = reference.putFile(path);
 
     await task
       .then((res) => {
-        console.log("response from storage uploading: ", res);
         storage()
           .ref(res.metadata.fullPath)
           .getDownloadURL()
@@ -57,7 +52,6 @@ const RegisterScreen = ({ navigation }) => {
             dispatch(addUserToFirestore(url));
             dispatch(setPhotoURLAction(url));
           });
-        // storage().ref(res)
       })
       .catch((e) => console.log("uploading image error => ", e));
   };
@@ -79,7 +73,6 @@ const RegisterScreen = ({ navigation }) => {
     }
 
     if (Platform.OS === "ios") {
-      console.log("path: ", path);
       path = "~" + path.substring(path.indexOf("/Documents"));
     }
     return path.split("/").pop();
@@ -91,8 +84,8 @@ const RegisterScreen = ({ navigation }) => {
         { name: "customOptionKey", title: "Choose Photo from Custom Option" },
       ],
       storageOptions: {
-        skipBackup: true, // do not backup to iCloud
-        path: "images", // store camera images under Pictures/images for android and Documents/images for iOS
+        skipBackup: true, 
+        path: "images",
       },
     };
     launchImageLibrary(options, (response) => {
@@ -110,25 +103,15 @@ const RegisterScreen = ({ navigation }) => {
         );
         setLocalPath(response.assets[0].uri);
         setFileNameResponse(response.fileName);
-        // setImagePath({ imagePath: path });
-        // uploadImageToStorage(localPath, fileName);
       }
     });
   };
-  // useEffect(() => {
-  //   if (fileNameResponse) setFileName(getFileName(fileNameResponse, localPath));
-  // }, [fileNameResponse]);
   const register = ({}) => {
     auth()
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
         uploadImageToStorage(
           localPath,
-          getFileName(fileNameResponse, localPath)
-        );
-        console.log("localPath: ", localPath);
-        console.log(
-          "the filename is: ",
           getFileName(fileNameResponse, localPath)
         );
 

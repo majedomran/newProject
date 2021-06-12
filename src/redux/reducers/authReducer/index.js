@@ -5,8 +5,6 @@ export const addUserToFirestore = createAsyncThunk(
   "auth/addUserToFirestore",
   async (url) => {
     const user = auth().currentUser
-    console.log(user);
-    
     firestore().collection("users").doc(user.uid).set({
       email:user.email,
       photo:url
@@ -16,16 +14,9 @@ export const addUserToFirestore = createAsyncThunk(
 export const loginAction = createAsyncThunk(
   "auth/loginAction",
   async (userAuths, { rejectWithValue }) => {
-    console.log("loginAction");
-    console.log(
-      `password: ${userAuths.password} 
-            userEmail: ${userAuths.email}
-          `
-    );
     return auth()
       .signInWithEmailAndPassword(userAuths.email, userAuths.password)
       .then(() => {
-        console.log("loged");
         return true;
       })
       .catch((err) => {
@@ -38,34 +29,22 @@ export const loginAction = createAsyncThunk(
 export const logoutAction = createAsyncThunk(
   "auth/logoutAction",
   async (empty, { rejectWithValue, getState }) => {
-    const chatRoomId = "0F112844-B80F-C753-2A07-670CB81692F7";
-    console.log("signed Out email:", getState().auth.userEmail);
-    // firestore()
-    //   .collection("chats")
-    //   .doc(chatRoomId)
-    //   .collection("users")
-    //   .doc(getState().auth.userEmail)
-    //   .delete();
     return auth()
       .signOut()
       .then(() => {
-        console.log("loged out");
         return false;
       })
       .catch((err) => {
         console.log(err);
-        return rejectWithValue(true);
+        return rejectWithValue('TRUE');
       });
-    console.log("signed Out");
   }
 );
 export const setUserAuthAction = createAsyncThunk(
   "auth/setUserAuthAction",
   async () => {
     let user = auth().currentUser;
-    console.log("user: ", user);
     return await firestore().collection('users').where("email","==",user.email).get().then((URL) => {
-      console.log('getting photo: ',URL.docs);
       
       return {
         userID: user.uid,
@@ -75,16 +54,7 @@ export const setUserAuthAction = createAsyncThunk(
     }).catch((e) => {
       console.log('error',e);
       
-    }).finally((res) => {
-      console.log("finally: ", res);
-      
-      
     })
-    // return {
-    //   userID: user.uid,
-    //   userEmail: user.email,
-    //   // photoURL:URL.docs?.[0]._data.photo
-    // };
   }
 );
 
@@ -93,6 +63,7 @@ const initialState = {
   userEmail: null,
   logedin: false,
   photoURL: null,
+  loginError:false
 };
 
 const authReducer = createSlice({
@@ -105,12 +76,10 @@ const authReducer = createSlice({
     },
     setLogedin: (state, action) => {
       state.logedin = action.payload;
+      state.loginError = action.payload
     },
   },
   extraReducers: {
-    // [loginAction.fulfilled]: (state, action) => {
-    //   state.logedin = action.payload;
-    // },
     [logoutAction.fulfilled]: (state, action) => {
       state.logedin = action.payload;
     },
@@ -120,6 +89,9 @@ const authReducer = createSlice({
       state.photoURL = action.payload.photoURL
       state.logedin = true
     },
+    [loginAction.rejected]: (state, action) => {
+      state.loginError = true
+    }
   },
 });
 

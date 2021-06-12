@@ -7,19 +7,13 @@ import firestore from "@react-native-firebase/firestore";
 import _ from "lodash";
 import { useDispatch } from "react-redux";
 import {generateGuid} from '../helpers'
-import {addChatsToStoreAction} from '../redux/reducers/chatMessagesReducer'
 import styles from '../styles/chatScreenStyles'
 Feather.loadFont();
 const ChatScreen = ({route, navigation }) => {
   dispatch = useDispatch();
   const [messages, setMessages] = useState([]);
-    
-    
-    
     const { chatID, userEmail, users } = route.params;
-    
     useEffect(() => {
-      // dispatch(addChatsToStoreAction(chatID,userEmail,messages))
       console.log(
         `route params:
         chatID: ${chatID}
@@ -35,7 +29,6 @@ const ChatScreen = ({route, navigation }) => {
       .onSnapshot((snapshot) => {
         snapshot.docs.forEach((doc) => {
           const { _id, createdAt, text, user } = doc.data();
-
           if (doc.data()._id) {
             fireMessages.push({
               _id,
@@ -57,12 +50,8 @@ const ChatScreen = ({route, navigation }) => {
   }, []);
 
   const onSend = (messages = []) => {
-    console.log("user id is: ", auth().currentUser.uid);
-    
     setMessages((previousState) => GiftedChat.append(previousState, messages));
-
     const { _id, createdAt, text, user } = messages[0];
-
     firestore()
       .collection("chats")
       .doc(chatID)
@@ -108,7 +97,6 @@ const ChatScreen = ({route, navigation }) => {
       headerRight: () => <TouchableOpacity></TouchableOpacity>,
     });
   }, [navigation]);
-
   const renderBubble = (props) => {
     return (
       <Bubble

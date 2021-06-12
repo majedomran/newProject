@@ -11,24 +11,15 @@ import storage from "@react-native-firebase/storage";
 import styles from '../styles/profileScreen'
 const profileScreen = ({ navigation }) => {
   const { userEmail, photoURL } = useSelector((state) => state.auth);
-  useEffect(() => {
-    console.log('photoURL is changing ');
-    
-  },[photoURL])
   const uploadImageToStorage = async (path, imageName) => {
     let reference = storage().ref(imageName);
-    console.log("storage path: ", path);
-
     let task = reference.putFile(path);
-
     await task
       .then((res) => {
-        console.log("response from storage uploading: ", res);
         storage()
           .ref(res.metadata.fullPath)
           .getDownloadURL()
           .then((url) => {
-            console.log("url from storage => ", url);
             dispatch(addUserToFirestore(url));
             dispatch(setPhotoURLAction(url))
           });
@@ -40,9 +31,7 @@ const profileScreen = ({ navigation }) => {
     if (name != null) {
       return name;
     }
-
     if (Platform.OS === "ios") {
-      console.log("path: ", path);
       path = "~" + path.substring(path.indexOf("/Documents"));
     }
     return path.split("/").pop();
@@ -54,8 +43,8 @@ const profileScreen = ({ navigation }) => {
         { name: "customOptionKey", title: "Choose Photo from Custom Option" },
       ],
       storageOptions: {
-        skipBackup: true, // do not backup to iCloud
-        path: "images", // store camera images under Pictures/images for android and Documents/images for iOS
+        skipBackup: true,
+        path: "images", 
       },
     };
     launchImageLibrary(options, (response) => {
@@ -74,9 +63,6 @@ const profileScreen = ({ navigation }) => {
         uploadImageToStorage(
           response.assets[0].uri,
           getFileName(response.fileName, response.assets[0].uri)
-        );
-        console.log(
-          "the filename is: ",
         );
       }
     });

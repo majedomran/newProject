@@ -28,73 +28,51 @@ const ChatRooms = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [emailToAdd, setEmailToAdd] = useState();
   useEffect(() => {
-    firestore().collection('chats').onSnapshot((snapshot) => {
-      console.log('new snapshot ',snapshot);
-      getChats()
-    })
-    
+    getChats();
   }, []);
   const getChats = () => {
     let chats = [];
-    console.log("current user is: ", userEmail);
     firestore()
       .collection("chats")
       .where("users", "array-contains", userEmail ? userEmail : "")
       .get()
       .then((snapshots) => {
         snapshots.docs.forEach((snapshot) => {
-          console.log("snapshot", snapshot);
           chats.push({ id: snapshot.id, users: snapshot._data.users });
         });
       })
       .then(() => {
-        console.log("chat .then <= ");
         let chatsClean = [];
         let users = [];
         chats.forEach((chat) => {
           chat.users.forEach((user) => {
             if (!user.includes(userEmail)) {
-              console.log("user contains => ", user);
               users.push(user);
               chatsClean.push({ id: chat.id, email: user });
             }
           });
         });
         let chatsWithPhotos = [];
-        console.log("users are => ", users);
-        console.log("chatsClean are => ", chatsClean);
         for (let index = 0; index < Math.ceil(users.length / 10); index++) {
-          // console.log("loop", Math.ceil(users.length / 10));
-
           let paginatedUsers = [];
           let paginatedChatsClean = [];
           for (let j = 0; j < 10; j++) {
             if (users[j] !== undefined) {
-              // console.log("copying loop", j);
-
               paginatedUsers[j] = users[index * 10 + j];
               paginatedChatsClean[j] = chatsClean[index * 10 + j];
             }
           }
-          console.log("paginated users: ", paginatedUsers);
-          console.log("paginated chats: ", paginatedChatsClean);
-
           firestore()
             .collection("users")
             .where("email", "in", paginatedUsers)
             .get()
             .then((res) => {
-              console.log("requesting from firestore photos");
-
-              console.log("res from photos", res.docs);
               let photosArray = [];
               res.docs.forEach((photo) => {
                 photosArray.push(photo._data);
               });
               if (photosArray.length !== 0) {
-                paginatedChatsClean.forEach((chat, index) => {
-                  console.log("index", index);
-
+                paginatedChatsClean.forEach((chat) => {
                   let found = false;
                   photosArray.forEach((photo) => {
                     if (chat.email === photo.email) {
@@ -113,23 +91,15 @@ const ChatRooms = ({ navigation }) => {
                       photo: null,
                     });
                 });
-                console.log("chatsWithPhotos ", chatsWithPhotos);
-
-                console.log("chats: ", chats);
-                console.log("chatsClean: ", chatsClean);
                 dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
               } else {
-                paginatedChatsClean.forEach((chat, index) => {
+                paginatedChatsClean.forEach((chat) => {
                   chatsWithPhotos.push({
                     id: chat.id,
                     email: chat.email,
                     photo: null,
-                  })
-                })
-
-                console.log("photoarray is empty");
-                console.log("chats: ", chats);
-                console.log("chatsClean: ", chatsClean);
+                  });
+                });
                 dispatch(setChatsReducerAction({ chatRooms: chatsWithPhotos }));
               }
             })
@@ -138,38 +108,28 @@ const ChatRooms = ({ navigation }) => {
             });
         }
       });
-  }
+  };
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
   const uploadImageToStorage = (path, imageName) => {
     let reference = storage().ref(imageName);
-    console.log("storage path: ", path);
     let task = reference.putFile(path);
     task
       .then((res) => {
-        console.log("respone from storage firebase", res);
         firestore()
           .collection("photos")
           .doc(generateGuid())
           .set({ email: userEmail, photoURL: res.metadata.fullPath });
-        console.log("Image uploaded to the bucket!");
       })
       .catch((e) => console.log("uploading image error => ", e));
   };
-
-  // return Platform.select({
-  //   // android: { path },
-  //   ios: { uri },
-  // });
-
   const getFileName = (name, path) => {
     if (name != null) {
       return name;
     }
 
     if (Platform.OS === "ios") {
-      console.log("path: ", path);
       path = "~" + path.substring(path.indexOf("/Documents"));
     }
     return path.split("/").pop();
@@ -178,11 +138,14 @@ const ChatRooms = ({ navigation }) => {
     var options = {
       title: "Select Image",
       customButtons: [
-        { name: "customOptionKey", title: "Choose Photo from Custom Option" },
+        {
+          name: "customOptionKey",
+          title: "Choose Photo from Custom Option",
+        },
       ],
       storageOptions: {
-        skipBackup: true, // do not backup to iCloud
-        path: "images", // store camera images under Pictures/images for android and Documents/images for iOS
+        skipBackup: true, 
+        path: "images", 
       },
     };
     launchImageLibrary(options, (response) => {
@@ -204,7 +167,6 @@ const ChatRooms = ({ navigation }) => {
   };
 
   const Item = ({ item }) => {
-    // console.log("item : ", item);
     return (
       <TouchableHighlight
         style={{ marginBottom: 10 }}
@@ -235,28 +197,26 @@ const ChatRooms = ({ navigation }) => {
       </TouchableHighlight>
     );
   };
-  //logout
   useEffect(() => {
     if (!logedin) navigation.popToTop();
   }, [logedin]);
   const signOut = () => {
     dispatch(logoutAction());
     dispatch(clearAllAction());
-    // navigation.replace("login");
   };
   const addChat = () => {
     toggleModal();
-    console.log("adding email: ", emailToAdd);
     let emailToAddSmall = emailToAdd.toLowerCase();
     const Guid = generateGuid();
     var req = firestore()
       .collection("chats")
       .doc(Guid)
-      .set({ users: [userEmail, emailToAdd === null ? "" : emailToAddSmall] }).then(() => {
-        getChats()
-      }).catch((e) => {
-        console.log('error', e);
-        
+      .set({ users: [userEmail, emailToAdd === null ? "" : emailToAddSmall] })
+      .then(() => {
+        getChats();
+      })
+      .catch((e) => {
+        console.log("error", e);
       });
   };
   return (

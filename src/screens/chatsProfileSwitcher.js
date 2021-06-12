@@ -16,7 +16,6 @@ function chatsProfileSwitcher({ navigation }) {
     dispatch(chatsClearAllAction());
     dispatch(logoutAction());
     dispatch(clearAllAction());
-    // navigation.replace("login");
   };
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -31,19 +30,14 @@ function chatsProfileSwitcher({ navigation }) {
         </View>
       ),
 
-      //   headerRight: () => <TouchableOpacity></TouchableOpacity>,
     });
   }, [navigation]);
   return (
     <Tab.Navigator>
-      {/* <Tab.Screen name="chatRooms" component={ChatRooms} 
-      options={{tabBarLabel:'Chats'}}
-      /> */}
       <Tab.Screen
         name="chatRooms"
         component={ChatRooms}
         options={{
-          // tabBarLabel: 'Chats',
           tabBarIcon: () => (
             <Feather name="message-circle" size={30} color="black" />
           ),
