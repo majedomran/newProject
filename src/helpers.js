@@ -10,3 +10,13 @@ export function generateGuid() {
     }
     return result;
   }
+  export const getFileName = (name, path) => {
+    if (name != null) {
+      return name;
+    }
+
+    if (Platform.OS === "ios") {
+      path = "~" + path.substring(path.indexOf("/Documents"));
+    }
+    return path.split("/").pop();
+  };

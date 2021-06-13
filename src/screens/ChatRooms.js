@@ -34,7 +34,7 @@ const ChatRooms = ({ navigation }) => {
     let chats = [];
     firestore()
       .collection("chats")
-      .where("users", "array-contains", userEmail ? userEmail : "")
+      .where("users", "array-contains", userEmail )
       .get()
       .then((snapshots) => {
         snapshots.docs.forEach((snapshot) => {
@@ -198,6 +198,7 @@ const ChatRooms = ({ navigation }) => {
     );
   };
   useEffect(() => {
+    
     if (!logedin) navigation.popToTop();
   }, [logedin]);
   const signOut = () => {

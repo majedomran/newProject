@@ -2,41 +2,41 @@ import { View, StyleSheet } from "react-native";
 import { Input, Button, Text } from "react-native-elements";
 import React, { useState, useEffect } from "react";
 import auth from "@react-native-firebase/auth";
-import { useSelector, useDispatch } from "react-redux";
+import {  useDispatch } from "react-redux";
 import {
   setLogedinAction,
-  setUserAuthAction,
+  getUserAuthAction,
   addUserToFirestore,
   setPhotoURLAction,
 } from "../redux/reducers/authReducer";
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
-import firestore from "@react-native-firebase/firestore";
 import styles from "../styles/registerScreenStyles";
+import {getFileName} from '../helpers'
 const RegisterScreen = ({ navigation }) => {
   dispatch = useDispatch();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState(null);
   const [registerError, setRegisterError] = useState("");
   const [localPath, setLocalPath] = useState("");
-  const [fileName, setFileName] = useState("");
   const [fileNameResponse, setFileNameResponse] = useState("");
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(function (user) {
-      if (user) {
-        console.log("in");
-      } else {
-        console.log("out");
-      }
-    });
-
-    return unsubscribe;
-  }, []);
+  const [lang, setLang] = useState({
+    en: {
+      enterName:'Enter your name',
+      nameText:'name',
+      addPhoto:'Add photo',
+      photo:'photo',
+      enterEmail: 'Enter your email',
+      enterPassword:"Enter your password",
+      passwordText:'Password',
+      emailText:'email',
+      signUp: 'Signup',
+      login: 'Login',
+      error:'Something went wrong'
+    },
+  });
   const uploadImageToStorage = async (path, imageName) => {
     let reference = storage().ref(imageName);
 
@@ -55,28 +55,7 @@ const RegisterScreen = ({ navigation }) => {
       })
       .catch((e) => console.log("uploading image error => ", e));
   };
-  const getPlatformPath = (uri) => {
-    console.log(
-      `
-      
-      uri: ${uri}`
-    );
-
-    return Platform.select({
-      // android: { path },
-      ios: { uri },
-    });
-  };
-  const getFileName = (name, path) => {
-    if (name != null) {
-      return name;
-    }
-
-    if (Platform.OS === "ios") {
-      path = "~" + path.substring(path.indexOf("/Documents"));
-    }
-    return path.split("/").pop();
-  };
+  
   chooseFile = () => {
     var options = {
       title: "Select Image",
@@ -115,7 +94,7 @@ const RegisterScreen = ({ navigation }) => {
           getFileName(fileNameResponse, localPath)
         );
 
-        dispatch(setUserAuthAction());
+        dispatch(getUserAuthAction());
 
         dispatch(setLogedinAction(true));
 
@@ -135,31 +114,32 @@ const RegisterScreen = ({ navigation }) => {
         console.log(error);
       });
   };
+  const {enterEmail,error,login,signUp,emailText,enterPassword,passwordText,addPhoto,enterName,nameText,photo} = lang.en
 
   return (
     <View style={styles.container}>
       <Input
-        placeholder="Enter your name"
-        label="Name"
+        placeholder={enterName}
+        label={name}
         value={name}
         onChangeText={(text) => setName(text)}
       />
       <Input
-        placeholder="Enter your email"
-        label="Email"
+        placeholder={enterEmail}
+        label={emailText}
         value={email}
         onChangeText={(text) => setEmail(text)}
       />
       <Input
-        placeholder="Enter your password"
-        label="Password"
+        placeholder={enterPassword}
+        label={password}
         value={password}
         onChangeText={(text) => setPassword(text)}
         secureTextEntry
       />
-      <Button title="Add Photo" onPress={chooseFile} />
+      <Button title={addPhoto} onPress={chooseFile} />
       <Text style={{ color: "red" }}>{registerError}</Text>
-      <Button title="register" style={styles.button} onPress={register} />
+      <Button title={signUp} style={styles.button} onPress={register} />
     </View>
   );
 };
