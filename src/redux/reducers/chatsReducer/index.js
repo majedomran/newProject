@@ -6,7 +6,8 @@ import auth from "@react-native-firebase/auth";
 const initialState = {
   chatRooms: [
     
-  ]
+  ],
+  loading:true
 };
 
 const chatsReducer = createSlice({
@@ -14,15 +15,17 @@ const chatsReducer = createSlice({
   initialState,
   reducers: {
     clearAll: () => initialState,
-
+    
     setChatsReducer: (state, action) => {
-       
-        
-      state.chatRooms = action.payload.chatRooms
+      let flattenedChats = action.payload
+      state.chatRooms = flattenedChats.flat()
     },
+    setLoading:(state,action) => {
+      state.loading = action.payload
+    }
   },
 });
 
-export const { setChatsReducer: setChatsReducerAction, clearAll:chatsClearAllAction } = chatsReducer.actions;
+export const { setChatsReducer: setChatsReducerAction, clearAll:chatsClearAllAction, setLoading: setLoadingAction } = chatsReducer.actions;
 
 export default chatsReducer.reducer;

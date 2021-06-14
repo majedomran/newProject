@@ -9,6 +9,9 @@ import ChatScreen from "./src/screens/ChatScreen";
 import ChatRooms from "./src/screens/ChatRooms"
 import profileScreen from "./src/screens/profileScreen"
 import chatsProfileSwitcher from "./src/screens/chatsProfileSwitcher"
+import LoadingScreen from './src/screens/LoadingScreen'
+
+
 import { Provider as PaperProvider } from "react-native-paper";
 import { PersistGate } from "redux-persist/integration/react";
 import {persistor} from './src/redux';
@@ -25,6 +28,8 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator>
           {/* <Stack.Screen name="chatRooms" component={ChatRooms}/> */}
+          
+          <Stack.Screen name="loadingScreen" component={LoadingScreen} />
           <Stack.Screen name="login" component={LoginScreen} />
           <Stack.Screen name="register" component={RegisterScreen} />
           <Stack.Screen name="profileScreen" component={profileScreen} />

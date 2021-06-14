@@ -7,14 +7,14 @@ export const addUserToFirestore = createAsyncThunk(
     const user = auth().currentUser
     firestore().collection("users").doc(user.uid).set({
       email:user.email,
-      photo:url
+      photo:url? url : null
     });
   }
 );
 export const loginAction = createAsyncThunk(
   "auth/loginAction",
   async (userAuths, { rejectWithValue }) => {
-    return auth()
+    return await auth()
       .signInWithEmailAndPassword(userAuths.email, userAuths.password)
       .then(() => {
         return true;
