@@ -1,50 +1,34 @@
-import { View, TouchableOpacity, Button } from "react-native";
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useLayoutEffect,
-} from "react";
+import { View, TouchableOpacity } from "react-native";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import auth from "@react-native-firebase/auth";
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
 import Feather from "react-native-vector-icons/Feather";
 import firestore from "@react-native-firebase/firestore";
 import _ from "lodash";
-
+import { useDispatch } from "react-redux";
+import {generateGuid} from '../helpers'
+import styles from '../styles/chatScreenStyles'
 Feather.loadFont();
-function generateGuid() {
-  var result, i, j;
-  result = "";
-  for (j = 0; j < 32; j++) {
-    if (j == 8 || j == 12 || j == 16 || j == 20) result = result + "-";
-    i = Math.floor(Math.random() * 16)
-      .toString(16)
-      .toUpperCase();
-    result = result + i;
-  }
-  return result;
-}
-const ChatScreen = ({ navigation }) => {
+const ChatScreen = ({route, navigation }) => {
+  dispatch = useDispatch();
   const [messages, setMessages] = useState([]);
-  const [chatRoomId, setChatRoomId] = useState(
-    "0F112844-B80F-C753-2A07-670CB81692F7"
-  );
-  const [currentUsers, setCurrentUsers] = useState(auth().currentUser.email);
-  const newChatRoom = () => {
-    setChatRoomId(generateGuid());
-  };
-  useEffect(() => {
+    const { chatID, userEmail, users } = route.params;
+    useEffect(() => {
+      console.log(
+        `route params:
+        chatID: ${chatID}
+        userEmail ${userEmail}
+        `
+      )
     const fireMessages = [];
-
     firestore()
       .collection("chats")
-      .doc(chatRoomId)
+      .doc(chatID)
       .collection("messages")
       .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
         snapshot.docs.forEach((doc) => {
           const { _id, createdAt, text, user } = doc.data();
-
           if (doc.data()._id) {
             fireMessages.push({
               _id,
@@ -63,64 +47,14 @@ const ChatScreen = ({ navigation }) => {
         );
       });
     console.log("updated");
-    let users = [];
-    firestore()
-      .collection("chats")
-      .doc(chatRoomId)
-      .collection("users")
-      .onSnapshot((snapshot) => {
-        users = [];
-        snapshot.docs.forEach((doc) => {
-          users.push(doc.data().user);
-        });
-        let usersTitle = "";
-        users.forEach((user) => {
-          usersTitle = usersTitle.concat(`${user.split("@", 1)},`);
-        });
-
-        navigation.setOptions({
-          title: usersTitle,
-        });
-
-        console.log("current users", usersTitle);
-      });
   }, []);
-  useEffect(() => {
-    firestore()
-      .collection("chats")
-      .doc(chatRoomId)
-      .collection("users")
-      .doc(auth().currentUser.email)
-      .set({
-        user: auth().currentUser.email,
-        timeStamp: new Date().toISOString(),
-      })
-      .then(() => {
-        console.log("user updated");
-      })
-      .catch((err) => {
-        console.log("firebase error", err);
-      });
 
-    return () => {
-      console.log("unmounted");
-      firestore()
-        .collection("chats")
-        .doc(chatRoomId)
-        .collection("users")
-        .doc(auth().currentUser.email)
-        .delete();
-    };
-  }, []);
   const onSend = (messages = []) => {
     setMessages((previousState) => GiftedChat.append(previousState, messages));
-    console.log(messages[0]);
-
     const { _id, createdAt, text, user } = messages[0];
-
     firestore()
       .collection("chats")
-      .doc(chatRoomId)
+      .doc(chatID)
       .collection("messages")
       .doc(generateGuid())
       .set({
@@ -135,24 +69,7 @@ const ChatScreen = ({ navigation }) => {
       });
   };
   const signOut = async () => {
-    await firestore()
-      .collection("chats")
-      .doc(chatRoomId)
-      .collection("users")
-      .doc(auth().currentUser.email)
-      .delete();
-
-    console.log("signed out");
-
-    auth()
-      .signOut()
-      .then(() => {
-        // Sign-out successful.
-        navigation.replace("Login");
-      })
-      .catch((error) => {
-        // An error happened.
-      });
+    navigation.navigate('chatRooms')
   };
   const deleteUser = () => {
     firestore()
@@ -165,9 +82,9 @@ const ChatScreen = ({ navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: currentUsers,
+      title: users.split('@')[0],
       headerLeft: () => (
-        <View style={{ marginLeft: 20 }}>
+        <View style={styles.backButton}>
           <Feather
             name="arrow-left"
             size={40}
@@ -180,7 +97,6 @@ const ChatScreen = ({ navigation }) => {
       headerRight: () => <TouchableOpacity></TouchableOpacity>,
     });
   }, [navigation]);
-
   const renderBubble = (props) => {
     return (
       <Bubble
@@ -201,7 +117,10 @@ const ChatScreen = ({ navigation }) => {
             color: "white",
           },
         }}
-        timeTextStyle={{ left: { color: "black" }, right: { color: "black" } }}
+        timeTextStyle={{
+          left: { color: "#AEAEAE" },
+          right: { color: "#AEAEAE" },
+        }}
       />
     );
   };
@@ -215,9 +134,10 @@ const ChatScreen = ({ navigation }) => {
       messages={messages}
       onSend={(messages) => onSend(messages)}
       user={{
-        _id: auth()?.currentUser?.email,
+        _id: auth()?.currentUser?.uid,
         name: auth()?.currentUser?.displayName,
       }}
+      renderAvatar={null}
       renderBubble={renderBubble}
     />
   );
