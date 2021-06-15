@@ -7,14 +7,14 @@ export const addUserToFirestore = createAsyncThunk(
     const user = auth().currentUser
     firestore().collection("users").doc(user.uid).set({
       email:user.email,
-      photo:url
+      photo:url? url : null
     });
   }
 );
 export const loginAction = createAsyncThunk(
   "auth/loginAction",
   async (userAuths, { rejectWithValue }) => {
-    return auth()
+    return await auth()
       .signInWithEmailAndPassword(userAuths.email, userAuths.password)
       .then(() => {
         return true;
@@ -40,8 +40,8 @@ export const logoutAction = createAsyncThunk(
       });
   }
 );
-export const setUserAuthAction = createAsyncThunk(
-  "auth/setUserAuthAction",
+export const getUserAuthAction = createAsyncThunk(
+  "auth/getUserAuthAction",
   async () => {
     let user = auth().currentUser;
     return await firestore().collection('users').where("email","==",user.email).get().then((URL) => {
@@ -83,7 +83,7 @@ const authReducer = createSlice({
     [logoutAction.fulfilled]: (state, action) => {
       state.logedin = action.payload;
     },
-    [setUserAuthAction.fulfilled]: (state, action) => {
+    [getUserAuthAction.fulfilled]: (state, action) => {
       state.userID = action.payload.userID;
       state.userEmail = action.payload.userEmail;
       state.photoURL = action.payload.photoURL

@@ -9,6 +9,7 @@ import {
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
 import styles from '../styles/profileScreen'
+import {getFileName} from '../helpers'
 const profileScreen = ({ navigation }) => {
   const { userEmail, photoURL } = useSelector((state) => state.auth);
   const uploadImageToStorage = async (path, imageName) => {
@@ -27,15 +28,7 @@ const profileScreen = ({ navigation }) => {
       .catch((e) => console.log("uploading image error => ", e));
   };
 
-  const getFileName = (name, path) => {
-    if (name != null) {
-      return name;
-    }
-    if (Platform.OS === "ios") {
-      path = "~" + path.substring(path.indexOf("/Documents"));
-    }
-    return path.split("/").pop();
-  };
+  
   chooseFile = () => {
     var options = {
       title: "Select Image",
@@ -54,12 +47,8 @@ const profileScreen = ({ navigation }) => {
         console.log("ImagePicker Error: ", response.error);
       } else if (response.customButton) {
         console.log("User tapped custom button: ", response.customButton);
-      } else {
-        console.log("response", response.assets[0].uri);
-        console.log(
-          `local path: ${response.assets[0].uri}
-          fileName: ${response.fileName}`
-        );
+      } else if(response.assets?.[0]?.uri){
+        
         uploadImageToStorage(
           response.assets[0].uri,
           getFileName(response.fileName, response.assets[0].uri)
