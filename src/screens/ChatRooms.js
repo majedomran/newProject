@@ -108,7 +108,7 @@ const ChatRooms = ({ navigation }) => {
     );
   };
   useEffect(() => {
-    if (!logedin) navigation.replace('login');
+    if (!logedin) navigation.popToTop('login');
   }, [logedin]);
   const signOut = () => {
     dispatch(logoutAction());
